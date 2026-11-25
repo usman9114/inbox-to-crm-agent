@@ -58,7 +58,7 @@ The `Leads` tab after a run of synthetic emails (**local mock sink**, not Google
 
 ```bash
 cp .env.example .env        # set LLM_PROVIDER and the matching API key
-docker compose up --build   # n8n on :5678, extractor on :8000
+docker compose up --build   # n8n on :5678, extractor on :8000 (override with N8N_PORT, EXTRACTOR_PORT)
 ```
 
 Then:
@@ -84,7 +84,8 @@ Run the extractor without Docker: `cd extractor && pip install -r requirements.t
 
 - **Run for real:** the extractor, both LLM providers via OpenRouter, the eval, n8n 1.123.0 (installed with npm and run locally), importing `workflow.json` and `error_workflow.json`, the webhook trigger, the Switch routing, the hot-lead branch and the error workflow.
 - **Mocked:** Google Sheets and Slack. No account for either was available, so `demo.gif`, `sheet_result.png` and `error_branch.png` show the local mock sink. The real Sheets and Slack nodes are in the exported workflow but were never executed against the real services.
-- **Not exercised:** the IMAP trigger (shipped disabled, no mailbox), the native Anthropic and OpenAI SDK paths (all measured runs went through OpenRouter; the code paths exist but were not run), and `docker compose up`: the Docker daemon was not available in the build environment, so the compose file is untested. The same n8n version and the same extractor code were run directly instead.
+- **Not exercised:** the native Anthropic and OpenAI SDK paths (all measured runs went through OpenRouter; the code paths exist but were not run), and the IMAP trigger (shipped disabled, no mailbox).
+- **Docker:** `docker compose up --build -d` was tested later, once a Docker daemon was available: the extractor image built, the extractor reported healthy (`/health` answered, a malformed email got 422), and the n8n 1.123.0 container served its UI (`/healthz` ok, `/signup` 200); then `docker compose down`. The test found that n8n exited because the container has no IPv6, so the compose file now sets `N8N_LISTEN_ADDRESS=0.0.0.0`. Host ports can be changed with `N8N_PORT` and `EXTRACTOR_PORT`. The sandbox proxy needed its CA added to the pip step of the build, which was done with an uncommitted local override; a normal network needs nothing extra. No LLM calls were made in that test, and importing the workflows inside the compose-run n8n was not repeated (it was done with the npm-installed n8n of the same version).
 - During recording, a follow-up run of 20 more emails stopped partway when the shared OpenRouter account ran out of credits. Those failed requests did what they should: the error workflow raised an alert for each.
 
 ## Adapt it to your business
