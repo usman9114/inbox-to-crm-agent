@@ -59,6 +59,7 @@ def _call_openai_compatible(messages: list[dict], model: str):
         model=model,
         messages=messages,
         temperature=0,
+        max_tokens=800,
         tools=[{"type": "function", "function": {"name": TOOL_NAME, "description": "Record the triage result", "parameters": _schema()}}],
         tool_choice={"type": "function", "function": {"name": TOOL_NAME}},
         **extra,

@@ -103,6 +103,7 @@ def main_workflow():
         "id": MAIN_ID, "name": "Inbox to CRM agent", "nodes": nodes,
         "connections": {k: {"main": [[{"node": n, "type": "main", "index": 0} for n in out] for out in v]} for k, v in conns.items()},
         "settings": {"executionOrder": "v1", "errorWorkflow": ERR_ID}, "active": False,
+        "versionId": "6f1d6a4e-0b57-4c0e-9d0a-5b0c7a111111", "pinData": {},
     }
 
 
@@ -122,6 +123,7 @@ def error_workflow():
         "connections": {"Error Trigger": {"main": [[{"node": "Slack: error alert", "type": "main", "index": 0},
                                                        {"node": "Sheet: Errors", "type": "main", "index": 0}]]}},
         "settings": {"executionOrder": "v1"}, "active": False,
+        "versionId": "6f1d6a4e-0b57-4c0e-9d0a-5b0c7a222222", "pinData": {},
     }
 
 

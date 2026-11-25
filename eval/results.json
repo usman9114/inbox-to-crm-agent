@@ -1,0 +1,157 @@
+[
+ {
+  "model": "anthropic/claude-haiku-4.5",
+  "n": 51,
+  "failed": [],
+  "intent_acc": 1.0,
+  "intent_correct": 51,
+  "field_exact": {
+   "company": [
+    42,
+    43
+   ],
+   "contact_name": [
+    40,
+    41
+   ],
+   "email": [
+    51,
+    51
+   ],
+   "phone": [
+    14,
+    14
+   ],
+   "budget": [
+    24,
+    25
+   ],
+   "timeline": [
+    7,
+    33
+   ],
+   "product_interest": [
+    24,
+    30
+   ]
+  },
+  "field_fuzzy": {
+   "company": 43,
+   "contact_name": 41,
+   "email": 51,
+   "phone": 14,
+   "budget": 24,
+   "timeline": 26,
+   "product_interest": 25
+  },
+  "exact_all": 0.8523206751054853,
+  "fuzzy_all": 0.9451476793248945,
+  "n_fields": 237,
+  "false_fill": 5,
+  "n_empty": 120,
+  "urg_exact": 0.7450980392156863,
+  "urg_near": 0.9607843137254902,
+  "review_pct": 0.0392156862745098,
+  "review": [
+   "e008",
+   "e051"
+  ],
+  "acc_nonreview": 1.0,
+  "acc_review": 1.0,
+  "lat_median": 1908,
+  "lat_p95": 2726,
+  "in_tok": 88212,
+  "out_tok": 12558,
+  "cost_total": 0.151002,
+  "cost_100": 0.29608235294117646,
+  "price": [
+   1e-06,
+   5e-06
+  ],
+  "hot": [
+   10,
+   10,
+   11
+  ],
+  "wrong": []
+ },
+ {
+  "model": "openai/gpt-4o-mini",
+  "n": 51,
+  "failed": [],
+  "intent_acc": 0.9803921568627451,
+  "intent_correct": 50,
+  "field_exact": {
+   "company": [
+    41,
+    43
+   ],
+   "contact_name": [
+    40,
+    41
+   ],
+   "email": [
+    51,
+    51
+   ],
+   "phone": [
+    14,
+    14
+   ],
+   "budget": [
+    21,
+    25
+   ],
+   "timeline": [
+    10,
+    33
+   ],
+   "product_interest": [
+    21,
+    30
+   ]
+  },
+  "field_fuzzy": {
+   "company": 42,
+   "contact_name": 41,
+   "email": 51,
+   "phone": 14,
+   "budget": 21,
+   "timeline": 26,
+   "product_interest": 22
+  },
+  "exact_all": 0.8354430379746836,
+  "fuzzy_all": 0.9156118143459916,
+  "n_fields": 237,
+  "false_fill": 7,
+  "n_empty": 120,
+  "urg_exact": 0.5882352941176471,
+  "urg_near": 0.9215686274509803,
+  "review_pct": 0.0,
+  "review": [],
+  "acc_nonreview": 0.9803921568627451,
+  "acc_review": null,
+  "lat_median": 2427,
+  "lat_p95": 3066,
+  "in_tok": 42604,
+  "out_tok": 4125,
+  "cost_total": 0.0088656,
+  "cost_100": 0.017383529411764704,
+  "price": [
+   1.5e-07,
+   6e-07
+  ],
+  "hot": [
+   10,
+   10,
+   11
+  ],
+  "wrong": [
+   [
+    "e024",
+    "support",
+    "other"
+   ]
+  ]
+ }
+]
