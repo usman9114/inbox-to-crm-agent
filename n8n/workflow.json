@@ -13,7 +13,7 @@
       ],
       "parameters": {
         "width": 520,
-        "height": 200,
+        "height": 150,
         "content": "## Inbox to CRM\nTwo triggers feed one pipeline: a form/webhook POST and an IMAP mailbox (disabled until you add IMAP credentials).\nThe extractor service classifies the intent, extracts the fields and decides if a human must review. Any failure raises the error workflow."
       }
     },

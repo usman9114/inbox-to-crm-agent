@@ -64,7 +64,7 @@ return [{ json: { from, subject: src.subject ?? '', body: src.body ?? src.textPl
 def main_workflow():
     nodes = [
         {"id": "note", "name": "Notes", "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [-80, -240],
-         "parameters": {"width": 520, "height": 200, "content": "## Inbox to CRM\nTwo triggers feed one pipeline: a form/webhook POST and an IMAP mailbox (disabled until you add IMAP credentials).\nThe extractor service classifies the intent, extracts the fields and decides if a human must review. Any failure raises the error workflow."}},
+         "parameters": {"width": 520, "height": 150, "content": "## Inbox to CRM\nTwo triggers feed one pipeline: a form/webhook POST and an IMAP mailbox (disabled until you add IMAP credentials).\nThe extractor service classifies the intent, extracts the fields and decides if a human must review. Any failure raises the error workflow."}},
         {"id": "wh", "name": "Inbound email webhook", "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [0, 60],
          "webhookId": "inbound-email-0001", "parameters": {"httpMethod": "POST", "path": "inbound-email", "responseMode": "onReceived", "options": {}}},
         {"id": "imap", "name": "IMAP mailbox", "type": "n8n-nodes-base.emailReadImap", "typeVersion": 2, "position": [0, 260], "disabled": True,

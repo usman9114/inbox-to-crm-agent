@@ -73,7 +73,7 @@ COLS = {
     "Leads": ["company", "contact_name", "email", "phone", "budget", "timeline", "product_interest", "urgency", "confidence", "hot", "status", "summary"],
     "Needs review": ["intent", "confidence", "contact_name", "email", "company", "review_reasons", "summary"],
     "Other inbox": ["intent", "contact_name", "email", "company", "urgency", "summary"],
-    "Errors": ["failed_at", "workflow", "node", "error"],
+    "Errors": ["failed_at", "node", "error"],
 }
 
 
@@ -87,12 +87,12 @@ def page(tab: str = "Leads"):
         for r in rows(tab))
     msgs = "".join(f'<div class="m"><b>#{e(m["channel"])}</b> <i>{e(m["ts"])}</i><br>{e(m["text"]).replace(chr(10), "<br>")}</div>' for m in reversed(slack_list()))
     return f"""<!doctype html><meta charset=utf-8><meta http-equiv=refresh content=2><title>Local mock sink</title>
-<style>body{{font:13px system-ui,sans-serif;margin:0;background:#f5f6f8;color:#1c1f26}}
+<style>body{{font:12px system-ui,sans-serif;margin:0;background:#f5f6f8;color:#1c1f26}}
 header{{background:#1c1f26;color:#fff;padding:10px 16px;font-weight:600}}header span{{color:#f6c453;font-weight:500;margin-left:10px}}
 .wrap{{display:flex;gap:16px;padding:16px}}.sheet{{flex:3;background:#fff;border:1px solid #d9dce3;border-radius:6px;overflow:auto}}
 .slack{{flex:1;background:#fff;border:1px solid #d9dce3;border-radius:6px;padding:10px}}
 .tabs a{{display:inline-block;padding:7px 14px;color:#555;text-decoration:none;border-bottom:2px solid transparent}}.tabs a.on{{color:#137333;border-color:#137333;font-weight:600}}
-table{{border-collapse:collapse;width:100%}}th{{background:#eef0f4;text-align:left;position:sticky;top:0}}td,th{{border:1px solid #e2e4ea;padding:5px 8px;white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis}}
+table{{border-collapse:collapse;width:100%}}th{{background:#eef0f4;text-align:left;position:sticky;top:0}}td,th{{border:1px solid #e2e4ea;padding:5px 8px;white-space:nowrap;max-width:230px;overflow:hidden;text-overflow:ellipsis}}
 .m{{border-left:3px solid #c0392b;background:#faf7f7;padding:6px 8px;margin-bottom:8px}}h4{{margin:0 0 8px}}</style>
 <header>CRM sheet and chat feed<span>LOCAL MOCK SINK (stand-in for Google Sheets and Slack, not the real services)</span></header>
 <div class=wrap><div class=sheet><div class=tabs>{tabs}</div><table><tr>{''.join(f'<th>{c}</th>' for c in cols)}</tr>{body}</table></div>
