@@ -1,0 +1,35 @@
+# n8n + extractor. Add `--profile mock` to also start the local mock sinks (stand-ins for Sheets/Slack).
+services:
+  extractor:
+    build: ./extractor
+    env_file: .env
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      retries: 5
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:1.123.0
+    ports:
+      - "5678:5678"
+    environment:
+      - GENERIC_TIMEZONE=UTC
+      - N8N_SECURE_COOKIE=false
+      - N8N_DIAGNOSTICS_ENABLED=false
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n:/import:ro
+    depends_on:
+      extractor:
+        condition: service_healthy
+
+  mock:
+    profiles: ["mock"]
+    build: ./mock
+    ports:
+      - "9000:9000"
+
+volumes:
+  n8n_data:
