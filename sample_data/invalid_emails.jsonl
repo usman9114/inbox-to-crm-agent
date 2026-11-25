@@ -1,0 +1,4 @@
+{"id": "bad1", "from": "not-an-email", "subject": "Hello", "body": "Please call me about pricing."}
+{"id": "bad2", "from": "empty.body@example.com", "subject": "(no body)", "body": "   "}
+{"id": "bad3", "from": "", "subject": "missing sender", "body": "We would like a quote for Support Desk."}
+{"id": "bad4", "subject": "no from field at all"}

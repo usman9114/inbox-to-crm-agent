@@ -1,0 +1,52 @@
+id,intent,company,contact_name,email,phone,budget,timeline,product_interest,urgency
+e001,sales_lead,Harborline Logistics,Maria Ortega,maria.ortega@harborline-logistics.example.com,555-0142,"$45,000",within 6 weeks,Field Service Scheduling,5
+e002,sales_lead,Piedmont Dental Partners,Daniel Okafor,d.okafor@piedmontdental.example.com,,,next quarter,Inventory Sync,3
+e003,sales_lead,Lumenfold Studio,Priya Raman,priya@lumenfold-studio.example.com,555-0187,$500 per month,before the 30th,Analytics Dashboard,4
+e004,sales_lead,Ridgeway Farms Cooperative,Takeshi Nakamura,t.nakamura@ridgeway-farms.example.com,,,2027 budget cycle,Field Service Scheduling,2
+e005,sales_lead,Quill & Crate,Sophie Laurent,cfo@quillandcrate.example.com,555-0123,"up to $2,000/month",before the 15th,Support Desk,5
+e006,sales_lead,Bluepeak HVAC Services,Carlos Mendes,info@bluepeak-hvac.example.com,555-0156,,in about 3 months,scheduling software,3
+e007,sales_lead,Northfjord Media,Anneli Virtanen,anneli.virtanen@northfjord-media.example.com,,$80k-$100k annually,decision by end of this month,Analytics Dashboard,4
+e008,sales_lead,Sundial Bakery,Jo,hello@sundial-bakery.example.com,,,maybe next year,,1
+e009,sales_lead,Vertex Build Supply,Rafael Castellanos,r.castellanos@vertexbuild.example.com,555-0164,"up to $120,000",within 10 days,Inventory Sync,5
+e010,sales_lead,Oak Hollow Veterinary Clinic,Lena Fischer,lena.fischer@oakhollow-clinic.example.com,,,spring,reseller programme,3
+e011,sales_lead,Tidewater Boat Rentals,Samir Haddad,samir@tidewater-boats.example.com,555-0191,"$12,000",before May,Field Service Scheduling,4
+e012,sales_lead,Greenleaf Print Works,Hannah Weiss,accounts@greenleaf-print.example.com,,,,dashboard product,2
+e013,sales_lead,Solstice Solar Installers,Isabela Cruz,ceo@solstice-solar.example.com,555-0178,"$30,000",board meets this Friday,Support Desk and Analytics Dashboard,5
+e014,sales_lead,Kestrel Legal LLP,Martin Brandt,m.brandt@kestrel-law.example.com,,"around $6,000 per year",this quarter,Support Desk,3
+e015,sales_lead,Mosaic Retail Group,Yuki Tanaka,yuki.tanaka@mosaic-retail.example.com,555-0135,"$8,000",pilot starting next month,Inventory Sync,4
+e016,sales_lead,Fernwood Cafe,Elena Petrova,owner@fernwood-cafe.example.com,,under $100 per month,no rush,Analytics Dashboard,2
+e017,sales_lead,Crestline Air Freight,Bola Adeyemi,b.adeyemi@crestline-airfreight.example.com,555-0149,"$60,000",in 7 days,Field Service Scheduling,5
+e018,sales_lead,Juniper Learning Foundation,Tomas Novak,contact@juniper-edu.example.com,,"about $3,000 for the year",start of school term in September,Support Desk,3
+e019,sales_lead,Brightpath Staffing,Anna Kowalczyk,a.kowalczyk@brightpath-staffing.example.com,555-0113,"$15,000 a year",trial starting Monday,Analytics Dashboard,4
+e020,sales_lead,Delmar Hotels,Ines Duarte,sales.inquiry@delmar-hotels.example.com,,,within two months,Support Desk,3
+e021,support,Harborline Logistics,Jon Pike,jon.pike@harborline-logistics.example.com,,,,Analytics Dashboard,4
+e022,support,Lumenfold Studio,Ravi,ravi@lumenfold-studio.example.com,,,,Analytics Dashboard,2
+e023,support,Tidewater Boat Rentals,Dana Whitfield,it@tidewater-boats.example.com,555-0102,,,Field Service Scheduling,5
+e024,support,Pinecrest Books,Karin Lindqvist,k.lindqvist@pinecrest-books.example.com,,,,,1
+e025,support,Oak Hollow Veterinary Clinic,William Chu,william.chu@oakhollow-clinic.example.com,,,,,3
+e026,support,Mosaic Retail Group,Sylvie Moreau,s.moreau@mosaic-retail.example.com,,,,Inventory Sync,3
+e027,support,Kestrel Legal LLP,Ahmed Said,ahmed.said@kestrel-law.example.com,,,,Support Desk,2
+e028,support,Vertex Build Supply,Hector Ruiz,ops@vertexbuild.example.com,555-0166,,before 6am tomorrow,Inventory Sync,4
+e029,support,Brightpath Staffing,Grace Liu,grace.liu@brightpath-staffing.example.com,,,,Analytics Dashboard,2
+e030,support,Sundial Bakery,Noah,noah@sundial-bakery.example.com,,,,mobile app,3
+e031,invoice,Paperplane Supplies,,billing@paperplane-supplies.example.com,,"$1,240.00",due within 30 days,,3
+e032,invoice,Cobalt Cloud Hosting,Marcus Bell,ar@cobaltcloud-hosting.example.com,555-0170,"$3,860.50",payment this week,,4
+e033,invoice,Stellar Telecom,,no-reply@stellar-telecom.example.com,,$212.18,due 12 December,,2
+e034,invoice,Lakeshore Legal,Priya Shah,finance@lakeshore-legal.example.com,,"$5,000",,,3
+e035,invoice,Orchard Print,Julia Moreno,j.moreno@orchard-print.example.com,,"$2,400",by Friday,,4
+e036,invoice,DataWell,,subscriptions@datawell.example.com,,$948.00,renews 3 January,,2
+e037,invoice,Meridian Courier Services,Elena Rossi,elena.rossi@meridian-courier.example.com,,$180,,,3
+e038,invoice,Ironbridge Equipment Rental,David Chen,collections@ironbridge-equipment.example.com,555-0121,"$14,750",within 48 hours,,5
+e039,spam,,,promo@seo-boost-now.example.com,,$99,7 days,SEO services,1
+e040,spam,,,winner@lucky-draw-intl.example.com,,"$1,000,000",within 24 hours,,1
+e041,spam,,,security@acc0unt-verify.example.com,,,within 12 hours,,2
+e042,spam,GrowthHacks Outreach,Kate,kate@growthhacks-outreach.example.com,,,,cold email automation,1
+e043,spam,,,deals@cheapmeds-online.example.com,,,,,1
+e044,spam,,,invest@cryptomax-signals.example.com,,$500,48 hours,,1
+e045,spam,,,outreach@leadlist-pro.example.com,,$149,,B2B email lists,1
+e046,other,TalentBridge,Olivia Grant,recruiter@talentbridge.example.com,,,,,2
+e047,other,CityBiz Forum,Paul Sterling,events@citybiz-forum.example.com,,,14 March,,2
+e048,other,,Mia Berg,mia.berg@example.com,,,,,1
+e049,other,Tech Digest Weekly,Raj Patel,press@techdigest-weekly.example.com,,,within the next two weeks,,2
+e050,other,Harbor & Finch LLP,Camille Finch,legal@harbor-and-finch.example.com,,,by 20 December,,3
+e051,other,,,unknown.sender@example.com,,,,,1
