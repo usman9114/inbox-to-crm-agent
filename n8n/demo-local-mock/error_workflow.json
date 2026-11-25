@@ -1,0 +1,75 @@
+{
+  "id": "inboxcrmerr1m",
+  "name": "Inbox to CRM: error handler (local mock sink)",
+  "nodes": [
+    {
+      "id": "et",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        100
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "sl",
+      "name": "Slack: error alert (mock)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        20
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:9000/slack/automation-alerts",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ text: `Workflow failed: ${$json.workflow.name}\nNode: ${$json.execution.lastNodeExecuted}\nError: ${$json.execution.error.message}\nExecution: ${$json.execution.url}` }) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "sheet:-errors",
+      "name": "Sheet: Errors (mock)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        200
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:9000/sheet/Errors",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ \"failed_at\": ($now.toISO()), \"workflow\": ($json.workflow.name), \"node\": ($json.execution.lastNodeExecuted), \"error\": ($json.execution.error.message), \"execution_id\": ($json.execution.id) }) }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Slack: error alert (mock)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Sheet: Errors (mock)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}

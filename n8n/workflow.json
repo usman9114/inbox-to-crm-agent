@@ -1,0 +1,455 @@
+{
+  "id": "inboxcrm01",
+  "name": "Inbox to CRM agent",
+  "nodes": [
+    {
+      "id": "note",
+      "name": "Notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -240
+      ],
+      "parameters": {
+        "width": 520,
+        "height": 200,
+        "content": "## Inbox to CRM\nTwo triggers feed one pipeline: a form/webhook POST and an IMAP mailbox (disabled until you add IMAP credentials).\nThe extractor service classifies the intent, extracts the fields and decides if a human must review. Any failure raises the error workflow."
+      }
+    },
+    {
+      "id": "wh",
+      "name": "Inbound email webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        60
+      ],
+      "webhookId": "inbound-email-0001",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "inbound-email",
+        "responseMode": "onReceived",
+        "options": {}
+      }
+    },
+    {
+      "id": "imap",
+      "name": "IMAP mailbox",
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2,
+      "position": [
+        0,
+        260
+      ],
+      "disabled": true,
+      "parameters": {
+        "mailbox": "INBOX",
+        "postProcessAction": "read",
+        "options": {}
+      }
+    },
+    {
+      "id": "norm",
+      "name": "Normalize email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        160
+      ],
+      "parameters": {
+        "jsCode": "// Webhook posts {from, subject, body}; the IMAP trigger gives {from, subject, textPlain}.\nconst j = $json;\nconst src = (j.body && typeof j.body === 'object') ? j.body : j;\nlet from = src.from ?? '';\nconst m = typeof from === 'string' ? from.match(/<([^>]+)>/) : null;   // \"Name <a@b.c>\" -> a@b.c\nif (m) from = m[1];\nreturn [{ json: { from, subject: src.subject ?? '', body: src.body ?? src.textPlain ?? src.text ?? '' } }];"
+      }
+    },
+    {
+      "id": "ext",
+      "name": "Extract (FastAPI)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        500,
+        160
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://extractor:8000/extract",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ from: $json.from, subject: $json.subject, body: $json.body }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      }
+    },
+    {
+      "id": "sw",
+      "name": "Route",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        740,
+        160
+      ],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "r-lead",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "lead",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Lead"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "r-review",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "review",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Needs review"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "r-other",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "other",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Other intent"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "sheet:-leads",
+      "name": "Sheet: Leads",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1000,
+        20
+      ],
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_SPREADSHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "received_at": "={{ $now.toISO() }}",
+            "company": "={{ $('Extract (FastAPI)').item.json.company }}",
+            "contact_name": "={{ $('Extract (FastAPI)').item.json.contact_name }}",
+            "email": "={{ $('Extract (FastAPI)').item.json.email }}",
+            "phone": "={{ $('Extract (FastAPI)').item.json.phone }}",
+            "budget": "={{ $('Extract (FastAPI)').item.json.budget }}",
+            "timeline": "={{ $('Extract (FastAPI)').item.json.timeline }}",
+            "product_interest": "={{ $('Extract (FastAPI)').item.json.product_interest }}",
+            "urgency": "={{ $('Extract (FastAPI)').item.json.urgency }}",
+            "intent": "={{ $('Extract (FastAPI)').item.json.intent }}",
+            "confidence": "={{ $('Extract (FastAPI)').item.json.confidence }}",
+            "summary": "={{ $('Extract (FastAPI)').item.json.summary }}",
+            "hot": "={{ $('Extract (FastAPI)').item.json.hot }}",
+            "status": "new"
+          },
+          "matchingColumns": [
+            "email"
+          ],
+          "schema": []
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "sheet:-needs-review",
+      "name": "Sheet: Needs review",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1000,
+        180
+      ],
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_SPREADSHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Needs review"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "received_at": "={{ $now.toISO() }}",
+            "company": "={{ $('Extract (FastAPI)').item.json.company }}",
+            "contact_name": "={{ $('Extract (FastAPI)').item.json.contact_name }}",
+            "email": "={{ $('Extract (FastAPI)').item.json.email }}",
+            "phone": "={{ $('Extract (FastAPI)').item.json.phone }}",
+            "budget": "={{ $('Extract (FastAPI)').item.json.budget }}",
+            "timeline": "={{ $('Extract (FastAPI)').item.json.timeline }}",
+            "product_interest": "={{ $('Extract (FastAPI)').item.json.product_interest }}",
+            "urgency": "={{ $('Extract (FastAPI)').item.json.urgency }}",
+            "intent": "={{ $('Extract (FastAPI)').item.json.intent }}",
+            "confidence": "={{ $('Extract (FastAPI)').item.json.confidence }}",
+            "summary": "={{ $('Extract (FastAPI)').item.json.summary }}",
+            "review_reasons": "={{ $('Extract (FastAPI)').item.json.review_reasons.join('; ') }}",
+            "status": "needs review"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "sheet:-other-inbox",
+      "name": "Sheet: Other inbox",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1000,
+        340
+      ],
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_SPREADSHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Other inbox"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "received_at": "={{ $now.toISO() }}",
+            "intent": "={{ $('Extract (FastAPI)').item.json.intent }}",
+            "contact_name": "={{ $('Extract (FastAPI)').item.json.contact_name }}",
+            "email": "={{ $('Extract (FastAPI)').item.json.email }}",
+            "company": "={{ $('Extract (FastAPI)').item.json.company }}",
+            "urgency": "={{ $('Extract (FastAPI)').item.json.urgency }}",
+            "summary": "={{ $('Extract (FastAPI)').item.json.summary }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "hot",
+      "name": "Hot lead?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1240,
+        20
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "hot1",
+              "leftValue": "={{ $('Extract (FastAPI)').item.json.hot }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "slack",
+      "name": "Slack: hot lead",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1480,
+        -20
+      ],
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "#hot-leads"
+        },
+        "text": "=Hot lead (urgency {{ $('Extract (FastAPI)').item.json.urgency }}/5): {{ $('Extract (FastAPI)').item.json.company || 'unknown company' }}, {{ $('Extract (FastAPI)').item.json.contact_name || '' }} <{{ $('Extract (FastAPI)').item.json.email }}>\n{{ $('Extract (FastAPI)').item.json.summary }}",
+        "otherOptions": {}
+      }
+    }
+  ],
+  "connections": {
+    "Inbound email webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IMAP mailbox": {
+      "main": [
+        [
+          {
+            "node": "Normalize email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize email": {
+      "main": [
+        [
+          {
+            "node": "Extract (FastAPI)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract (FastAPI)": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route": {
+      "main": [
+        [
+          {
+            "node": "Sheet: Leads",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sheet: Needs review",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sheet: Other inbox",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheet: Leads": {
+      "main": [
+        [
+          {
+            "node": "Hot lead?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hot lead?": {
+      "main": [
+        [
+          {
+            "node": "Slack: hot lead",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "inboxcrmerr1"
+  },
+  "active": false
+}
