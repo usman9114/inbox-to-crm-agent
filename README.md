@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/banner.webp" alt="inbox-to-crm-agent banner (illustration)" width="100%"></p>
+
 # inbox-to-crm-agent
 
 An AI agent that reads your inbox, qualifies leads and updates your CRM automatically.
