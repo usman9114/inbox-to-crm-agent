@@ -177,7 +177,7 @@ def report(results: list[dict]) -> str:
     row("Field match, fuzzy (labelled fields)", lambda r: f"{pct(r['fuzzy_all'])} of {r['n_fields']}")
     row("Urgency exact / within ±1", lambda r: f"{pct(r['urg_exact'])} / {pct(r['urg_near'])}")
     row("Fields filled where label is empty", lambda r: f"{r['false_fill']} of {r['n_empty']}")
-    row("Routed to human review", lambda r: f"{pct(r['review_pct'])} ({len(r['review'])} emails)")
+    row("Routed to human review", lambda r: f"{pct(r['review_pct'])} ({len(r['review'])} email{'' if len(r['review']) == 1 else 's'})")
     row("Intent accuracy: auto-routed / reviewed", lambda r: f"{pct(r['acc_nonreview'])} / " + (pct(r['acc_review']) if r['acc_review'] is not None else "n/a"))
     row("Hot-lead alerts: correct / expected / fired", lambda r: f"{r['hot'][0]} / {r['hot'][1]} / {r['hot'][2]}")
     row("Median latency (sequential calls)", lambda r: f"{r['lat_median'] / 1000:.2f} s")
