@@ -1,9 +1,13 @@
 """Run the extractor over the labelled emails and write eval/results.md.
 
-    python eval/run_eval.py --provider openrouter --model anthropic/claude-haiku-4.5 --model openai/gpt-4o-mini
+    python eval/run_eval.py --model zai:glm-4.7-flash \
+        --model openrouter:anthropic/claude-haiku-4.5 --model openrouter:openai/gpt-4o-mini
+
+A model is given as provider:model (provider = zai | openrouter | openai | anthropic).
 
 Each (model, email) result is cached in eval/cache/ so a crash or re-run does not re-spend money.
-Cost = real token counts returned by the API x the per-token price listed by OpenRouter.
+Cost = real token counts returned by the API x the listed per-token price (OpenRouter's model list;
+Z.ai Flash models are listed as free: https://docs.z.ai/guides/overview/pricing).
 """
 import argparse
 import csv
@@ -24,15 +28,27 @@ sys.path.insert(0, str(ROOT / "extractor"))
 FIELDS = ["company", "contact_name", "email", "phone", "budget", "timeline", "product_interest"]
 INTENTS = ["sales_lead", "support", "invoice", "spam", "other"]
 CACHE = ROOT / "eval/cache"
+PROVIDERS = {"zai", "openrouter", "openai", "anthropic"}
 
 
-def prices(model: str) -> tuple[float, float]:
-    """USD per prompt / completion token, from the OpenRouter model list."""
+ZAI_FREE = {"glm-4.7-flash", "glm-4.5-flash"}  # "Free" on the pricing page
+ZAI_PRICING = "https://docs.z.ai/guides/overview/pricing"
+
+
+def prices(provider: str, model: str) -> tuple[float, float, str]:
+    """USD per prompt / completion token and where the price comes from."""
+    if provider == "zai":
+        if model in ZAI_FREE:
+            return 0.0, 0.0, f"Z.ai lists {model} as free ({ZAI_PRICING}, checked {date.today()})"
+        raise SystemExit(f"no price known for zai model {model}; add it from {ZAI_PRICING}")
+    if provider != "openrouter":
+        raise SystemExit("cost is only computed for zai and openrouter runs")
     req = urllib.request.Request("https://openrouter.ai/api/v1/models")
     with urllib.request.urlopen(req, timeout=30) as r:
         for m in json.load(r)["data"]:
             if m["id"] == model:
-                return float(m["pricing"]["prompt"]), float(m["pricing"]["completion"])
+                pin, pout = float(m["pricing"]["prompt"]), float(m["pricing"]["completion"])
+                return pin, pout, f"${pin * 1e6:.2f} / ${pout * 1e6:.2f} per million input / output tokens (OpenRouter list)"
     raise SystemExit(f"model {model} not found in OpenRouter list")
 
 
@@ -79,13 +95,14 @@ def run_one(client, model: str, row: dict) -> dict:
     return out
 
 
-def evaluate(model: str, rows, labels) -> dict:
+def evaluate(spec: str, rows, labels, default_provider: str) -> dict:
     from fastapi.testclient import TestClient
     import app as appmod
 
-    os.environ["LLM_MODEL"] = model
+    provider, model = spec.split(":", 1) if ":" in spec and spec.split(":", 1)[0] in PROVIDERS else (default_provider, spec)
+    os.environ["LLM_PROVIDER"], os.environ["LLM_MODEL"] = provider, model
     client = TestClient(appmod.app)
-    pin, pout = prices(model)
+    pin, pout, price_note = prices(provider, model)
     res = {}
     for row in rows:
         res[row["id"]] = run_one(client, model, row)
@@ -121,8 +138,11 @@ def evaluate(model: str, rows, labels) -> dict:
     nonrev = [i for i in ok if i not in review]
     gold_hot = {i for i in ok if labels[i]["intent"] == "sales_lead" and int(labels[i]["urgency"]) >= 4}
     pred_hot = {i for i, d in ok.items() if d["hot"]}
+    stamps = [(CACHE / (model.replace("/", "_") + f"__{i}.json")) for i in ok]
+    measured = max(date.fromtimestamp(f.stat().st_mtime) for f in stamps if f.exists()).isoformat() if stamps else "n/a"
     return dict(
-        model=model, n=n, failed=failed, intent_acc=sum(correct.values()) / len(ok),
+        backoff=sum(d.get("backoff_retries", 0) for d in ok.values()),
+        model=model, provider=provider, measured=measured, price_note=price_note, n=n, failed=failed, intent_acc=sum(correct.values()) / len(ok),
         intent_correct=sum(correct.values()), cm=cm,
         field_exact={f: (fe[f], ft[f]) for f in FIELDS}, field_fuzzy={f: ff[f] for f in FIELDS},
         exact_all=sum(fe.values()) / sum(ft.values()), fuzzy_all=sum(ff.values()) / sum(ft.values()),
@@ -141,14 +161,17 @@ def evaluate(model: str, rows, labels) -> dict:
 def pct(x): return f"{100 * x:.1f}%"
 
 
-def report(results: list[dict], provider: str) -> str:
+def report(results: list[dict]) -> str:
     L = [f"# Eval results", "",
-         f"Run date: {date.today()}. Labelled set: {results[0]['n']} synthetic emails (`eval/labels.csv`). "
-         f"Provider path: `{provider}` (one API, both vendors' models). Extractor code path: `POST /extract`, temperature 0, tool-calling with a Pydantic schema.", "",
+         f"Labelled set: {results[0]['n']} synthetic emails (`eval/labels.csv`). Extractor code path: `POST /extract`, temperature 0, "
+         "tool calling with a Pydantic schema (forced tool call on OpenRouter; Z.ai only supports `tool_choice: auto`, so a JSON text answer is also accepted and validated). "
+         "Each model's answers are cached in `eval/cache/`; a model is only called for emails it has no cached answer for, so rows keep the date they were measured.", "",
          "Generated by `eval/run_eval.py`; nothing in this file is typed by hand.", "", "## Headline", "",
          "| Metric | " + " | ".join(f"`{r['model']}`" for r in results) + " |",
          "|---|" + "---|" * len(results)]
     def row(name, fn): L.append(f"| {name} | " + " | ".join(fn(r) for r in results) + " |")
+    row("Provider", lambda r: f"`{r['provider']}`")
+    row("Measured on", lambda r: r["measured"])
     row("Intent accuracy", lambda r: f"{pct(r['intent_acc'])} ({r['intent_correct']}/{r['n'] - len(r['failed'])})")
     row("Field match, exact (labelled fields)", lambda r: f"{pct(r['exact_all'])} of {r['n_fields']}")
     row("Field match, fuzzy (labelled fields)", lambda r: f"{pct(r['fuzzy_all'])} of {r['n_fields']}")
@@ -162,6 +185,7 @@ def report(results: list[dict], provider: str) -> str:
     row("Tokens in / out (total)", lambda r: f"{r['in_tok']:,} / {r['out_tok']:,}")
     row("Cost per 100 emails", lambda r: f"${r['cost_100']:.3f}")
     row("Total cost of this run", lambda r: f"${r['cost_total']:.4f}")
+    row("Rate-limit retries (429 / overload, included in latency)", lambda r: str(r["backoff"]))
     row("Requests that failed", lambda r: str(len(r["failed"])) + (f" ({', '.join(r['failed'])})" if r["failed"] else ""))
     for r in results:
         L += ["", f"## `{r['model']}`", "", "Per-field match (exact / fuzzy / labelled):", "",
@@ -175,30 +199,29 @@ def report(results: list[dict], provider: str) -> str:
             L.append(f"| {g} | " + " | ".join(str(r["cm"][g][p]) for p in INTENTS) + " |")
         L += ["", "Wrong intents: " + (", ".join(f"{i} (label {g}, predicted {p})" for i, g, p in r["wrong"]) or "none"),
               "", "Routed to review: " + (", ".join(r["review"]) or "none"),
-              "", f"Price used: ${r['price'][0] * 1e6:.2f} / ${r['price'][1] * 1e6:.2f} per million input / output tokens (OpenRouter list)."]
+              "", f"Price used: {r['price_note']}."]
     L += ["", "## How the numbers are defined", "",
           "- Intent accuracy: predicted intent equals the label.",
           "- Field match is scored only where the label is non-empty. Exact = equal after lower-casing and removing punctuation; phone compares digits only; budget compares the numeric amounts (so `$2,000/month` equals `up to $2,000 per month`). Fuzzy = exact, or string similarity >= 0.8, or one string contains the other (budget: every labelled amount appears in the answer).",
           "- `Fields filled where label is empty` counts hallucination-like fills for company, name, phone, budget, timeline and product interest (email is excluded because the sender address is always available).",
           "- Review = confidence below 0.7, an invalid extracted email, or a sales lead with no contact detail or no company/name.",
           "- Latency is wall time of the whole `/extract` call including retries, one request at a time, from a shared container over a proxy. Treat it as indicative.",
-          "- Cost = actual prompt and completion tokens returned by the API x listed price. Cached prompt discounts are not assumed.",
+          "- Cost = actual prompt and completion tokens returned by the API x listed price. Cached prompt discounts are not assumed. Z.ai's Flash models are listed as free, so their cost is $0 while the token counts are still recorded; free tiers are rate-limited and can change.",
           "- 51 emails is a small set, so one email moves a percentage by about 2 points. These are demo-scale numbers, not a benchmark."]
     return "\n".join(L) + "\n"
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--provider", default="openrouter")
+    ap.add_argument("--provider", default="zai", help="provider for --model values without a provider: prefix")
     ap.add_argument("--model", action="append", required=True)
     ap.add_argument("--limit", type=int)
     ap.add_argument("--out", default=str(ROOT / "eval/results.md"))
     a = ap.parse_args()
-    os.environ["LLM_PROVIDER"] = a.provider
     rows = [json.loads(l) for l in open(ROOT / "sample_data/emails.jsonl")][: a.limit]
     labels = {r["id"]: r for r in csv.DictReader(open(ROOT / "eval/labels.csv"))}
-    results = [evaluate(m, rows, labels) for m in a.model]
-    Path(a.out).write_text(report(results, a.provider))
+    results = [evaluate(m, rows, labels, a.provider) for m in a.model]
+    Path(a.out).write_text(report(results))
     (ROOT / "eval/results.json").write_text(json.dumps(
         [{k: v for k, v in r.items() if k != "cm"} for r in results], indent=1, default=list))
     print("wrote", a.out)
