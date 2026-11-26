@@ -64,6 +64,7 @@ class ExtractionOut(Extraction):
     latency_ms: int
     prompt_tokens: int = 0
     completion_tokens: int = 0
+    backoff_retries: int = 0
 
 
 REVIEW_CONFIDENCE = 0.7

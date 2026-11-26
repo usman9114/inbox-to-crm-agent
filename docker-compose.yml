@@ -3,6 +3,8 @@ services:
   extractor:
     build: ./extractor
     env_file: .env
+    environment:
+      - LLM_PROVIDER=${LLM_PROVIDER:-zai}
     ports:
       - "${EXTRACTOR_PORT:-8000}:8000"
     healthcheck:

@@ -46,4 +46,5 @@ def extract(mail: EmailIn):
         latency_ms=r.latency_ms,
         prompt_tokens=r.prompt_tokens,
         completion_tokens=r.completion_tokens,
+        backoff_retries=r.backoff_retries,
     )

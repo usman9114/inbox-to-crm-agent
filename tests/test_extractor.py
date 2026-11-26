@@ -62,3 +62,13 @@ def test_llm_failure_returns_502(monkeypatch):
     monkeypatch.setattr(llm, "extract", boom)
     r = TestClient(appmod.app).post("/extract", json={"from": "a@b.co", "subject": "s", "body": "hi"})
     assert r.status_code == 502
+
+
+def test_zai_is_default_provider(monkeypatch):
+    monkeypatch.delenv("LLM_PROVIDER", raising=False)
+    monkeypatch.delenv("LLM_MODEL", raising=False)
+    assert llm.provider() == "zai" and llm.model_name() == "glm-4.5-flash"
+
+
+def test_json_in_markdown_fence_is_accepted():
+    assert json.loads(llm._strip_fences('```json\n{"a": 1}\n```')) == {"a": 1}
