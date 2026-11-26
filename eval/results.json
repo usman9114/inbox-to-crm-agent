@@ -1,6 +1,89 @@
 [
  {
+  "backoff": 7,
+  "model": "glm-4.5-flash",
+  "provider": "zai",
+  "measured": "2026-11-26",
+  "price_note": "Z.ai lists glm-4.5-flash as free (https://docs.z.ai/guides/overview/pricing, checked 2026-11-26)",
+  "n": 51,
+  "failed": [],
+  "intent_acc": 1.0,
+  "intent_correct": 51,
+  "field_exact": {
+   "company": [
+    41,
+    43
+   ],
+   "contact_name": [
+    40,
+    41
+   ],
+   "email": [
+    51,
+    51
+   ],
+   "phone": [
+    14,
+    14
+   ],
+   "budget": [
+    24,
+    25
+   ],
+   "timeline": [
+    9,
+    33
+   ],
+   "product_interest": [
+    23,
+    30
+   ]
+  },
+  "field_fuzzy": {
+   "company": 43,
+   "contact_name": 41,
+   "email": 51,
+   "phone": 14,
+   "budget": 25,
+   "timeline": 27,
+   "product_interest": 26
+  },
+  "exact_all": 0.8523206751054853,
+  "fuzzy_all": 0.9578059071729957,
+  "n_fields": 237,
+  "false_fill": 17,
+  "n_empty": 120,
+  "urg_exact": 0.5294117647058824,
+  "urg_near": 0.9411764705882353,
+  "review_pct": 0.0196078431372549,
+  "review": [
+   "e051"
+  ],
+  "acc_nonreview": 1.0,
+  "acc_review": 1.0,
+  "lat_median": 4869,
+  "lat_p95": 32873,
+  "in_tok": 56378,
+  "out_tok": 6321,
+  "cost_total": 0.0,
+  "cost_100": 0.0,
+  "price": [
+   0.0,
+   0.0
+  ],
+  "hot": [
+   8,
+   10,
+   8
+  ],
+  "wrong": []
+ },
+ {
+  "backoff": 0,
   "model": "anthropic/claude-haiku-4.5",
+  "provider": "openrouter",
+  "measured": "2026-11-25",
+  "price_note": "$1.00 / $5.00 per million input / output tokens (OpenRouter list)",
   "n": 51,
   "failed": [],
   "intent_acc": 1.0,
@@ -76,7 +159,11 @@
   "wrong": []
  },
  {
+  "backoff": 0,
   "model": "openai/gpt-4o-mini",
+  "provider": "openrouter",
+  "measured": "2026-11-25",
+  "price_note": "$0.15 / $0.60 per million input / output tokens (OpenRouter list)",
   "n": 51,
   "failed": [],
   "intent_acc": 0.9803921568627451,
