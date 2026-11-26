@@ -1,9 +1,13 @@
 import logging
+from pathlib import Path
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 
 import llm
 from schema import EmailIn, ExtractionOut, review_reasons
+
+load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)  # no-op in Docker; compose env wins
 
 log = logging.getLogger("extractor")
 app = FastAPI(title="inbox-to-crm extractor", version="1.0")

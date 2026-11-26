@@ -80,7 +80,7 @@ Then:
 - *Slack:* add a Slack credential and set the channels `#hot-leads` and `#automation-alerts`.
 - *IMAP:* the IMAP node is shipped disabled. Add an IMAP credential and enable it to read a real mailbox.
 
-Run the extractor without Docker: `cd extractor && pip install -r requirements.txt && uvicorn app:app --port 8000` (export the keys from `.env` first; the service reads environment variables, not the file). Tests: `pip install -r requirements-dev.txt && pytest`.
+Run the extractor without Docker: `cd extractor && pip install -r requirements.txt && uvicorn app:app --port 8000`. Tests: `pip install -r requirements-dev.txt && pytest`.
 
 ### Local mock sink (what the demo used)
 
