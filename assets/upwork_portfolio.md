@@ -5,9 +5,9 @@
 **Role:** AI automation engineer (solo demo project)
 
 **Description (about 300 chars):**
-Demo on synthetic data. Leads sit unread and get copied into the CRM by hand. n8n + FastAPI + LLM triages each email, extracts 9 fields, flags uncertain ones for review and alerts Slack on hot leads. Measured on 51 labelled emails: 100% intent accuracy, 94.5% field match, ~$0.30 per 100 emails.
+Demo on synthetic data. Leads sit unread and get copied into the CRM by hand. n8n + FastAPI + LLM triages each email, extracts 9 fields, flags uncertain ones and alerts Slack on hot leads. On 51 labelled emails: 100% intent accuracy, 95.8% field match, $0 per 100 emails (free GLM).
 
-**Skills tags:** n8n, AI Automation, API Integration, OpenAI API, Claude, FastAPI
+**Skills tags:** n8n, AI Automation, API Integration, OpenAI API, Claude, FastAPI (GLM via Z.ai also supported)
 
 **Media order:** demo.gif → cover_1600x1200.png → workflow.png → sheet_result.png
 
